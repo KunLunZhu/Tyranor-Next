@@ -51,6 +51,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -68,7 +69,6 @@ import com.tyranor.next.core.engine.EngineType
 import com.tyranor.next.core.game.model.ScanGame
 import com.tyranor.next.core.settings.AppSettingsStore
 import com.tyranor.next.theme.NavWhite
-import com.tyranor.next.theme.NavWhiteOverlay
 import com.tyranor.next.theme.PageSecondaryTextColor
 import com.tyranor.next.theme.TextColor
 import com.tyranor.next.theme.QuickLaunchFallback
@@ -235,12 +235,12 @@ private fun NativeHomeContent(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(
-                start = 12.dp,
-                end = 12.dp,
+                start = 14.dp,
+                end = 14.dp,
                 top = 4.dp,
-                bottom = 16.dp + glassNavBottomInset(),
+                bottom = 20.dp + glassNavBottomInset(),
             ),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (!libraryState.loaded) {
                 // 加载中：快捷启动区（空态）在顶部，指示器占满剩余空间居中
@@ -294,7 +294,7 @@ private fun NativeHomeContent(
                 ) { row ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         row.forEach { game ->
                             RecentGameCard(
@@ -464,7 +464,7 @@ private fun QuickLaunchCard(
     }
     BoxWithConstraints(
         modifier = modifier
-            .height(172.dp)
+            .height(186.dp)
             .clip(AppComponentShape)
             .background(QuickLaunchFallback)
             .glassBorder(),
@@ -507,8 +507,21 @@ private fun QuickLaunchCard(
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize().blur(24.dp),
             )
-            // 黑色压暗遮罩：保证白色文字可读
-            Box(Modifier.matchParentSize().background(Color.Black.copy(alpha = 0.25f)))
+            // 左侧压暗 + 底部渐隐：白色标题更实，右侧封面保持通透，卡片不再是一整块灰
+            Box(
+                Modifier.matchParentSize().background(
+                    Brush.horizontalGradient(
+                        listOf(Color.Black.copy(alpha = 0.58f), Color.Black.copy(alpha = 0.10f)),
+                    ),
+                ),
+            )
+            Box(
+                Modifier.matchParentSize().background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.38f)),
+                    ),
+                ),
+            )
         }
         Column(
             modifier = Modifier
@@ -544,7 +557,7 @@ private fun QuickLaunchCard(
                     modifier = Modifier.fillMaxHeight().padding(start = 12.dp),
                     contentAlignment = Alignment.Center,
                 ) {
-                    val coverWidth = (cardMaxWidth * 0.32f).coerceAtMost(99.dp)
+                    val coverWidth = (cardMaxWidth * 0.36f).coerceAtMost(108.dp)
                     Box(
                         modifier = Modifier
                             .width(coverWidth)
@@ -658,19 +671,23 @@ private fun RecentGameCard(
                 color = Color.White.copy(alpha = 0.7f),
             )
         }
-        // 底部信息面板：仅展示游戏名（比卡片默认标题小一号）
+        // 底部信息面板：封面下缘渐隐压暗，白色标题浮在封面上，不再切出一条灰白条
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .background(NavWhiteOverlay)
-                .padding(horizontal = 12.dp, vertical = 12.5.dp),
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color.Transparent, Color.Black.copy(alpha = 0.72f)),
+                    ),
+                )
+                .padding(horizontal = 12.dp, vertical = 12.dp),
         ) {
             Text(
                 game.title,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
+                color = Color.White,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
